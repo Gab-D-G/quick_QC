@@ -13,10 +13,11 @@ pip install rabies==0.5.1
 # Usage
 
 Load dependencies and activate python environment:
-'''
+
+```sh
 module load anaconda FSL ANTs minc-toolkit-v2 minc-toolkit-extras
 conda activate quick_qc
-'''
+```
 
 Run the script:
 
