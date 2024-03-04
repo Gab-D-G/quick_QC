@@ -7,7 +7,7 @@
 module load anaconda # need some version of anaconda/miniconda
 conda create -n quick_qc python=3.9
 conda activate quick_qc
-pip install rabies==0.5.1
+pip install rabies==0.5.1 bruker
 ```
 
 # Usage

@@ -1,15 +1,8 @@
 ###INPUTS
 
-# example: bash quick_qc.sh bold_file.nii out_folder 1.0 '0,120'
-
-bold_file=$1
-output_folder=$2
-TR=$3
-cutoff=$4
-ica_dim=$5
-
+output_folder=$1
+input=$output_folder/median.nii.gz
 masking_thresh=1.2
-DR_ON=TRUE
 ###
 
 # get path of the script
@@ -20,16 +13,9 @@ template_mask=$parent_path/EPI_brain_mask.nii.gz
 SM_IC_file=$parent_path/somatomotor_IC.nii.gz
 DMN_IC_file=$parent_path/DMN_IC.nii.gz
 
-
-echo "Process timeseries"
-mkdir -p $output_folder
-python $parent_path/process.py $bold_file $TR $cutoff $output_folder # takes ~6 seconds to run
-
-
 echo "Bias correction"
 bias_cor_out=$output_folder/bias_cor
 mkdir -p $bias_cor_out
-input=$output_folder/median.nii.gz
 ImageMath 3 ${bias_cor_out}/null_mask.nii.gz ThresholdAtMean $input 0
 ImageMath 3 ${bias_cor_out}/thresh_mask.nii.gz ThresholdAtMean $input $masking_thresh
 
@@ -55,16 +41,3 @@ antsApplyTransforms -d 3 -i $SM_IC_file -t [ ${reg_out}/tomodel0GenericAffine.ma
 
 antsApplyTransforms -d 3 -i $DMN_IC_file -t [ ${reg_out}/tomodel0GenericAffine.mat,1 ] \
 -o $output_folder/resampled_ICs/DMN_IC.nii.gz -n Linear -r ${input} --verbose
-
-echo "Dual regression"
-python $parent_path/process2.py $output_folder $DR_ON
-
-echo "MELODIC"
-
-# way faster to compute with the mask, ~12sec
-melodic -i $output_folder/processed_img.nii.gz -o $output_folder/melodic_masked.ica \
---report -v -m ${reg_out}/mask_resampled.nii.gz --tr=$TR --bgimage=$output_folder/median.nii.gz --seed=1 -d $ica_dim
-
-# generate melodic at the end within mask in case registration failed
-melodic -i $output_folder/processed_img.nii.gz -o $output_folder/melodic_nomask.ica \
---report -v --nomask --tr=$TR --bgimage=$output_folder/median.nii.gz --seed=1 -d $ica_dim
