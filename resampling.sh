@@ -8,10 +8,10 @@ masking_thresh=1.2
 # get path of the script
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-template_anat=$parent_path/EPI_template.nii.gz
-template_mask=$parent_path/EPI_brain_mask.nii.gz
-SM_IC_file=$parent_path/somatomotor_IC.nii.gz
-DMN_IC_file=$parent_path/DMN_IC.nii.gz
+template_anat=$parent_path/template_files/EPI_template.nii.gz
+template_mask=$parent_path/template_files/EPI_brain_mask.nii.gz
+SM_IC_file=$parent_path/template_files/somatomotor_IC.nii.gz
+DMN_IC_file=$parent_path/template_files/DMN_IC.nii.gz
 
 echo "Bias correction"
 bias_cor_out=$output_folder/bias_cor
