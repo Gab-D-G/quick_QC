@@ -1,3 +1,5 @@
+#! /usr/bin/env python 
+
 import argparse
 
 def get_parser():
@@ -20,7 +22,8 @@ def get_parser():
     parser.add_argument(
         "--isnii", dest='isnii', action='store_true',
         help=
-            "Specify that a nifti file was provided for --raw_path instead of bruker raw data. No conversion will be run. \n"
+            "Select this parameter if a nifti file was provided for --raw_path \n"
+            "instead of bruker raw data. No conversion will be run. \n"
             "(default: %(default)s)\n"
             "\n"
         )
@@ -49,7 +52,9 @@ def get_parser():
         "--cutoff", dest='cutoff', type=str,
         default='none',
         help=
-            ""
+            "Can specify a cutoff range to select only part of the timeseries \n"
+            "(e.g. '0,120' will select the frames from index 0 to 120, i.e. 2min \n"
+            "of acquisition with a TR of 1.0 second). 'none' takes the full timeseries. \n"
             "(default: %(default)s)\n"
             "\n"
         )
@@ -74,7 +79,6 @@ raw_path = os.path.abspath(opts.raw_path)
 scan_id=opts.scan_id
 reco_id=opts.reco_id
 TR=opts.TR
-TR = float(TR)
 cutoff=opts.cutoff
 ica_dim=opts.ica_dim
 DR_ON=True
