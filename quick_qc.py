@@ -1,20 +1,28 @@
 import argparse
+
 def get_parser():
     """Build parser object"""
     parser = argparse.ArgumentParser(
         description=
             "Parser to handle testing using token data.",
         formatter_class=argparse.RawTextHelpFormatter)
-    preprocess.add_argument(
-        'output_folder', action='store', type=Path,
+    parser.add_argument(
+        'output_folder', action='store', type=str,
         help=
             "the output folder path.\n"
             "\n"
         )
     parser.add_argument(
-        "--raw_path", dest='raw_path', type=Path,
+        "--raw_path", dest='raw_path', type=str,
         help=
             "path to bruker raw folder."
+        )
+    parser.add_argument(
+        "--isnii", dest='isnii', action='store_true',
+        help=
+            "Specify that a nifti file was provided for --raw_path instead of bruker raw data. No conversion will be run. \n"
+            "(default: %(default)s)\n"
+            "\n"
         )
     parser.add_argument(
         "--scan_id", dest='scan_id', type=int,
@@ -22,7 +30,7 @@ def get_parser():
             "scan id to select in raw folder."
         )
     parser.add_argument(
-        "--reco_id", dest='scan_id', type=int,
+        "--reco_id", dest='reco_id', type=int,
         default=1,
         help=
             "reco id if multiple reconstructions. Provide 1 otherwise.\n"
@@ -31,14 +39,19 @@ def get_parser():
        )
     parser.add_argument(
         "--TR", dest='TR', type=float,
+        default=1.0,
         help=
             "TR in seconds."
+            "(default: %(default)s)\n"
+            "\n"
         )
     parser.add_argument(
         "--cutoff", dest='cutoff', type=str,
         default='none',
         help=
             ""
+            "(default: %(default)s)\n"
+            "\n"
         )
     parser.add_argument(
         "--ica_dim", dest='ica_dim', type=str,
@@ -54,9 +67,10 @@ def get_parser():
 parser = get_parser()
 opts = parser.parse_args()
 
+import os
 ###INPUTS
-output_folder=opts.output_folder
-raw_path = opts.raw_path
+output_folder=os.path.abspath(opts.output_folder)
+raw_path = os.path.abspath(opts.raw_path)
 scan_id=opts.scan_id
 reco_id=opts.reco_id
 TR=opts.TR
@@ -68,16 +82,18 @@ DR_ON=True
 
 from rabies.utils import run_command
 from utils import *
-import os
 script_path = os.path.realpath(__file__)
 quick_qc_folder = os.path.dirname(script_path)
 os.makedirs(output_folder, exist_ok=True)
 
-print("brkraw conversion")
-import brkraw as br
-rawdata = br.load(raw_path)
-rawdata.save_as(scan_id, reco_id, 'brkraw_out', dir=output_folder, ext='nii.gz')
-bold_file = f'{output_folder}/brkraw_out.nii.gz'
+if not opts.isnii:
+    print("brkraw conversion")
+    import brkraw as br
+    rawdata = br.load(raw_path)
+    rawdata.save_as(scan_id, reco_id, 'brkraw_out', dir=output_folder, ext='nii.gz')
+    bold_file = f'{output_folder}/brkraw_out.nii.gz'
+else:
+    bold_file = raw_path
 
 print("Process timeseries")
 preproc_bold(bold_file, TR, cutoff, output_folder)
